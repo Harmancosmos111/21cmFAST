@@ -186,7 +186,43 @@ double TFmdm(double k); //Eisenstien & Hu power spectrum transfer function
 void TFset_parameters();
 float get_R_c();  // returns R_CUTOFF
 double get_M_min_ion(float z);
+double Lx_SFR_Fragos(double M, double z, double Alpha_star, double Fstar10, double Mlim_Fstar);
 /***************************************/
+
+
+double Lx_SFR_Fragos(double M, double z, double Alpha_star, double Fstar10, double Mlim_Fstar )
+{
+
+    double Z_Sun = 0.012 ;
+    double Z_0 =  9.102 - 0.002  ;                            // best fit for saturation metallicity
+    double b = (9.138 - 0.003) + (2.64* log10(1.0 + z)) ;         // best fit for logM_0
+    double M_0 =  pow(10, b)  ;
+    double gamma = 0.513 + 0.009  ;
+    double mg_Sun = 8.69 ;
+    double Fstar = 0;
+    if (Alpha_star > 0. && M > Mlim_Fstar)
+        Fstar = 1./Fstar10;
+    else if (Alpha_star < 0. && M < Mlim_Fstar)
+        Fstar = 1/Fstar10;
+    else
+        Fstar = pow(M/1e10,Alpha_star);
+    double M_st = Fstar * (OMm/OMb) * M ;
+    double mg = Z_0 + log10(1.0 - pow(E, -pow(M_st/M_0,gamma))) ;
+    double Z = pow(10.0,mg - mg_Sun)   ;
+    double A = 4.13e+01;
+    double Z_turn = 8.03e-03/0.012 ;        //in Solar units
+    double alpha = 3e-01 ;
+    double Lxsfr = 0;
+    if (Z<1e-3/0.012){
+            Lxsfr = log10(8.0e40) ;
+               }
+    else
+    {
+            Lxsfr  = A + alpha * log10(Z/Z_turn) - (Z/Z_turn)  ;
+             }
+    return  0.5*pow(10.,Lxsfr)/pow(10.,40.) ; 
+printf("The value of Luminosity is %e",Lxsfr);
+}
 
 
 
@@ -1286,7 +1322,7 @@ float Nion_ConditionallnM_GL(float lnM, struct parameters_gsl_SFR_con_int_ param
 	else
 		Fesc = pow(M/1e10,Alpha_esc);
 
-    return M*exp(-MassTurnover/M)*Fstar*Fesc*dNdM_conditional_second(z,log(M),M2,del1,del2)/sqrt(2.*PI);
+    return Lx_SFR_Fragos(M,z,Alpha_star,Fstar10,Mlim_Fstar)*M*exp(-MassTurnover/M)*Fstar*Fesc*dNdM_conditional_second(z,log(M),M2,del1,del2)/sqrt(2.*PI);
 
 }
 
@@ -1355,7 +1391,7 @@ double dNion_ConditionallnM(double lnM, void *params) {
 	else 
 		Fesc = pow(M/1e10,Alpha_esc);
 
-    return M*exp(-MassTurnover/M)*Fstar*Fesc*dNdM_conditional_second(z,log(M),M2,del1,del2)/sqrt(2.*PI);
+    return Lx_SFR_Fragos(M,z,Alpha_star,Fstar10,Mlim_Fstar)*M*exp(-MassTurnover/M)*Fstar*Fesc*dNdM_conditional_second(z,log(M),M2,del1,del2)/sqrt(2.*PI);
 }
 
 double Nion_ConditionalM(double z, double M1, double M2, double delta1, double delta2, double MassTurnover, double Alpha_star, double Alpha_esc, double Fstar10, double Fesc10, double Mlim_Fstar, double Mlim_Fesc) {
