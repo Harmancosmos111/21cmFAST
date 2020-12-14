@@ -834,7 +834,7 @@ double freq_int_heat[NUM_FILTER_STEPS_FOR_Ts], freq_int_ion[NUM_FILTER_STEPS_FOR
     Luminosity_conversion_factor *= (3.1556226e7)/(hplank);
 //    const_zp_prefactor = ( X_LUMINOSITY * Luminosity_conversion_factor ) / NU_X_THRESH * C 
 //			 * F_STAR10 * OMb * RHOcrit * pow(CMperMPC, -3) * pow(1+zp, X_RAY_SPEC_INDEX+3);
-    const_zp_prefactor =  pow(10.0,40.0) / NU_X_THRESH * C 
+    const_zp_prefactor =  pow(10.0,40.0) / NU_X_THRESH * (3.1556226e7)/(hplank)*C 
                        * F_STAR10 * OMb * RHOcrit * pow(CMperMPC, -3) * pow(1+zp, X_RAY_SPEC_INDEX+3);
 
 
