@@ -220,7 +220,7 @@ double Lx_SFR_Fragos(double M, double z, double Alpha_star, double Fstar10, doub
     {
             Lxsfr  = A + alpha * log10(Z/Z_turn) - (Z/Z_turn)  ;
              }
-    return  0.5*pow(10.,Lxsfr)/pow(10.,40.) ; 
+    return  pow(10.,Lxsfr)/pow(10.,40.) ;    //no conversion factor has been included here
 printf("The value of Luminosity is %e",Lxsfr);
 }
 
@@ -1323,6 +1323,7 @@ float Nion_ConditionallnM_GL(float lnM, struct parameters_gsl_SFR_con_int_ param
 		Fesc = pow(M/1e10,Alpha_esc);
 
     return Lx_SFR_Fragos(M,z,Alpha_star,Fstar10,Mlim_Fstar)*M*exp(-MassTurnover/M)*Fstar*Fesc*dNdM_conditional_second(z,log(M),M2,del1,del2)/sqrt(2.*PI);
+//      return M*exp(-MassTurnover/M)*Fstar*Fesc*dNdM_conditional_second(z,log(M),M2,del1,del2)/sqrt(2.*PI);
 
 }
 
@@ -1392,6 +1393,9 @@ double dNion_ConditionallnM(double lnM, void *params) {
 		Fesc = pow(M/1e10,Alpha_esc);
 
     return Lx_SFR_Fragos(M,z,Alpha_star,Fstar10,Mlim_Fstar)*M*exp(-MassTurnover/M)*Fstar*Fesc*dNdM_conditional_second(z,log(M),M2,del1,del2)/sqrt(2.*PI);
+
+//      return M*exp(-MassTurnover/M)*Fstar*Fesc*dNdM_conditional_second(z,log(M),M2,del1,del2)/sqrt(2.*PI);
+
 }
 
 double Nion_ConditionalM(double z, double M1, double M2, double delta1, double delta2, double MassTurnover, double Alpha_star, double Alpha_esc, double Fstar10, double Fesc10, double Mlim_Fstar, double Mlim_Fesc) {
