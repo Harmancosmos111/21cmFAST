@@ -8,7 +8,7 @@ from matplotlib import ticker
 import matplotlib.pyplot as plt
 
 data_1 = np.loadtxt('Programs/Power_k0.1_fid')
-data_2 = np.loadtxt('Programs/Power_k0.1_updated_2')
+data_2 = np.loadtxt('Programs/Power_k0.1_updated')
 #data_3 = np.loadtxt('Programs/Power_k0.1')
 plt.plot(data_1[:,0], data_1[:,2], label  =r"${\rm constant\ Lx/SFR}$", c = 'k')
 plt.plot(data_2[:,0], data_2[:,2], label  =r"${\rm Lx/SFR\ Fraogs}$", c = 'b')
@@ -17,7 +17,7 @@ plt.plot(data_2[:,0], data_2[:,2], label  =r"${\rm Lx/SFR\ Fraogs}$", c = 'b')
 plt.xlabel(r"${{\rm Redshift},\,z}$",fontsize='large')
 plt.ylabel(r"${\overline{\delta T}^{2}_{\rm b}\Delta^{2}_{21}\,\,[\rm mK^{2}]}$",fontsize='large')
 plt.legend()
-plt.close()
+plt.show()
 #plt.savefig("Global_signal.pdf")
 
 z_187 = np.loadtxt('z_187')[:-1]
