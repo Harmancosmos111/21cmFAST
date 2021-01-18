@@ -23,7 +23,7 @@ static gsl_spline *erfc_spline;
 
 #define NR_END 1
 #define FREE_ARG char*
-
+#define Z_Sun 0.012
 #define MM 7
 #define NSTACK 50
 
@@ -145,10 +145,14 @@ float *Overdense_spline_SFR,*Nion_spline,*second_derivs_Nion;
 float *xi_SFR,*wi_SFR;
 
 float Nion_ConditionallnM_GL(float M, struct parameters_gsl_SFR_con_int_ parameters_gsl_SFR_con);
+float Nion_ConditionallnM_GL_Xray(float M, struct parameters_gsl_SFR_con_int_ parameters_gsl_SFR_con);
 float GaussLegendreQuad_Nion(int n, float z, float M2, float delta1, float delta2, float MassTurnover, float Alpha_star, float Alpha_esc, float Fstar10, float Fesc10, float Mlim_Fstar, float Mlim_Fesc);
+float GaussLegendreQuad_Nion_Xray(int n, float z, float M2, float delta1, float delta2, float MassTurnover, float Alpha_star, float Alpha_esc, float Fstar10, float Fesc10, float Mlim_Fstar, float Mlim_Fesc);
 double dNion_ConditionallnM(double lnM, void *params);
+double dNion_ConditionallnM_Xray(double lnM, void *params);
 double Nion_ConditionalM(double z, double M1, double M2, double delta1, double delta2, double MassTurnover, double Alpha_star, double Alpha_esc, double Fstar10, double Fesc10, double Mlim_Fstar, double Mlim_Fesc);
 
+double Nion_ConditionalM_Xray(double z, double M1, double M2, double delta1, double delta2, double MassTurnover, double Alpha_star, double Alpha_esc, double Fstar10, double Fesc10, double Mlim_Fstar, double Mlim_Fesc);
 double dNion_ST(double lnM, void *params);
 double Nion_ST(double z, double MassTurnover, double Alpha_star, double Alpha_esc, double Fstar10, double Fesc10, double Mlim_Fstar, double Mlim_Fesc);
 /* New in v2 - part 3 of 4: end */
@@ -193,11 +197,11 @@ double Lx_SFR_Fragos(double M, double z, double Alpha_star, double Fstar10, doub
 double Lx_SFR_Fragos(double M, double z, double Alpha_star, double Fstar10, double Mlim_Fstar )
 {
 
-    double Z_Sun = 0.012 ;
-    double Z_0 =  9.102 - 0.002  ;                            // best fit for saturation metallicity
-    double b = (9.138 - 0.003) + (2.64* log10(1.0 + z)) ;         // best fit for logM_0
+    
+    double Z_0 =  9.100  ;                            // best fit for saturation metallicity
+    double b = 9.135 + (2.64* log10(1.0 + z)) ;         // best fit for logM_0
     double M_0 =  pow(10, b)  ;
-    double gamma = 0.513 + 0.009  ;
+    double gamma = 0.522  ;
     double mg_Sun = 8.69 ;
     double Fstar = 0;
     if (Alpha_star > 0. && M > Mlim_Fstar)
@@ -210,10 +214,10 @@ double Lx_SFR_Fragos(double M, double z, double Alpha_star, double Fstar10, doub
     double mg = Z_0 + log10(1.0 - pow(E, -pow(M_st/M_0,gamma))) ;
     double Z = pow(10.0,mg - mg_Sun)   ;
     double A = 4.13e+01;
-    double Z_turn = 8.03e-03/0.012 ;        //in Solar units
+    double Z_turn = 8.03e-03/Z_Sun ;        //in Solar units
     double alpha = 3e-01 ;
     double Lxsfr = 0;
-    if (Z<1e-3/0.012){
+    if (Z<1e-3/Z_Sun){
             Lxsfr = log10(8.0e40) ;
                }
     else
@@ -221,7 +225,6 @@ double Lx_SFR_Fragos(double M, double z, double Alpha_star, double Fstar10, doub
             Lxsfr  = A + alpha * log10(Z/Z_turn) - (Z/Z_turn)  ;
              }
     return  pow(10.,Lxsfr)/pow(10.,40.) ;    //no conversion factor has been included here
-printf("The value of Luminosity is %e",Lxsfr);
 }
 
 
@@ -1322,10 +1325,44 @@ float Nion_ConditionallnM_GL(float lnM, struct parameters_gsl_SFR_con_int_ param
 	else
 		Fesc = pow(M/1e10,Alpha_esc);
 
-    return Lx_SFR_Fragos(M,z,Alpha_star,Fstar10,Mlim_Fstar)*M*exp(-MassTurnover/M)*Fstar*Fesc*dNdM_conditional_second(z,log(M),M2,del1,del2)/sqrt(2.*PI);
-//      return M*exp(-MassTurnover/M)*Fstar*Fesc*dNdM_conditional_second(z,log(M),M2,del1,del2)/sqrt(2.*PI);
+//    return Lx_SFR_Fragos(M,z,Alpha_star,Fstar10,Mlim_Fstar)*M*exp(-MassTurnover/M)*Fstar*Fesc*dNdM_conditional_second(z,log(M),M2,del1,del2)/sqrt(2.*PI);
+      return M*exp(-MassTurnover/M)*Fstar*Fesc*dNdM_conditional_second(z,log(M),M2,del1,del2)/sqrt(2.*PI);
 
 }
+
+float Nion_ConditionallnM_GL_Xray(float lnM, struct parameters_gsl_SFR_con_int_ parameters_gsl_SFR_con){
+    float M = exp(lnM);
+    float z = parameters_gsl_SFR_con.z_obs;
+    float M2 = parameters_gsl_SFR_con.Mval;
+    float del1 = parameters_gsl_SFR_con.delta1;
+    float del2 = parameters_gsl_SFR_con.delta2;
+    float MassTurnover = parameters_gsl_SFR_con.Mdrop;
+    float Alpha_star = parameters_gsl_SFR_con.pl_star;
+    float Alpha_esc = parameters_gsl_SFR_con.pl_esc;
+        float Fstar10 = parameters_gsl_SFR_con.frac_star;
+        float Fesc10 = parameters_gsl_SFR_con.frac_esc;
+        float Mlim_Fstar = parameters_gsl_SFR_con.LimitMass_Fstar;
+        float Mlim_Fesc = parameters_gsl_SFR_con.LimitMass_Fesc;
+
+        float Fstar,Fesc;
+
+        if (Alpha_star > 0. && M > Mlim_Fstar)
+                Fstar = 1./Fstar10;
+        else if (Alpha_star < 0. && M < Mlim_Fstar)
+                Fstar = 1./Fstar10;
+        else
+                Fstar = pow(M/1e10,Alpha_star);
+
+        if (Alpha_esc > 0. && M > Mlim_Fesc)
+                Fesc = 1./Fesc10;
+        else if (Alpha_esc < 0. && M < Mlim_Fesc)
+                Fesc = 1./Fesc10;
+        else
+                Fesc = pow(M/1e10,Alpha_esc);
+return Lx_SFR_Fragos(M,z,Alpha_star,Fstar10,Mlim_Fstar)*M*exp(-MassTurnover/M)*Fstar*Fesc*dNdM_conditional_second(z,log(M),M2,del1,del2)/sqrt(2.*PI);
+}
+
+
 
 float GaussLegendreQuad_Nion(int n, float z, float M2, float delta1, float delta2, float MassTurnover, float Alpha_star, float Alpha_esc, float Fstar10, float Fesc10, float Mlim_Fstar, float Mlim_Fesc) {
     //Performs the Gauss-Legendre quadrature.
@@ -1361,6 +1398,41 @@ float GaussLegendreQuad_Nion(int n, float z, float M2, float delta1, float delta
 
 }
 
+float GaussLegendreQuad_Nion_Xray(int n, float z, float M2, float delta1, float delta2, float MassTurnover, float Alpha_star, float Alpha_esc, float Fstar10, float Fesc10, float Mlim_Fstar, float Mlim_Fesc) {
+    //Performs the Gauss-Legendre quadrature.
+    int i;
+
+    float integrand, x;
+    integrand = 0.;
+
+    struct parameters_gsl_SFR_con_int_ parameters_gsl_SFR_con = {
+        .z_obs = z,
+        .Mval = M2,
+        .delta1 = delta1,
+        .delta2 = delta2,
+        .Mdrop = MassTurnover,
+        .pl_star = Alpha_star,
+        .pl_esc = Alpha_esc,
+                .frac_star = Fstar10,
+                .frac_esc = Fesc10,
+                .LimitMass_Fstar = Mlim_Fstar,
+                .LimitMass_Fesc = Mlim_Fesc
+    };
+
+    if(delta2 > delta1){
+        return 1.;
+    }
+    else{
+        for(i=1; i<(n+1); i++){
+            x = xi_SFR[i];
+            integrand += wi_SFR[i]*Nion_ConditionallnM_GL_Xray(x,parameters_gsl_SFR_con);
+        }
+        return integrand;
+    }
+
+}
+
+
 double dNion_ConditionallnM(double lnM, void *params) {
     struct parameters_gsl_SFR_con_int_ vals = *(struct parameters_gsl_SFR_con_int_ *)params;
     double M = exp(lnM); // linear scale
@@ -1392,10 +1464,42 @@ double dNion_ConditionallnM(double lnM, void *params) {
 	else 
 		Fesc = pow(M/1e10,Alpha_esc);
 
+//    return Lx_SFR_Fragos(M,z,Alpha_star,Fstar10,Mlim_Fstar)*M*exp(-MassTurnover/M)*Fstar*Fesc*dNdM_conditional_second(z,log(M),M2,del1,del2)/sqrt(2.*PI);
+
+      return M*exp(-MassTurnover/M)*Fstar*Fesc*dNdM_conditional_second(z,log(M),M2,del1,del2)/sqrt(2.*PI);
+}
+
+double dNion_ConditionallnM_Xray(double lnM, void *params) {
+    struct parameters_gsl_SFR_con_int_ vals = *(struct parameters_gsl_SFR_con_int_ *)params;
+    double M = exp(lnM); // linear scale
+    double z = vals.z_obs;
+    double M2 = vals.Mval; // natural log scale
+    double del1 = vals.delta1;
+    double del2 = vals.delta2;
+    double MassTurnover = vals.Mdrop;
+    double Alpha_star = vals.pl_star;
+    double Alpha_esc = vals.pl_esc;
+        double Fstar10 = vals.frac_star;
+        double Fesc10 = vals.frac_esc;
+        double Mlim_Fstar = vals.LimitMass_Fstar;
+        double Mlim_Fesc = vals.LimitMass_Fesc;
+
+        double Fstar,Fesc;
+
+        if (Alpha_star > 0. && M > Mlim_Fstar)
+                Fstar = 1./Fstar10;
+        else if (Alpha_star < 0. && M < Mlim_Fstar)
+                Fstar = 1./Fstar10;
+        else
+                Fstar = pow(M/1e10,Alpha_star);
+
+        if (Alpha_esc > 0. && M > Mlim_Fesc)
+                Fesc = 1./Fesc10;
+        else if (Alpha_esc < 0. && M < Mlim_Fesc)
+                Fesc = 1./Fesc10;
+        else
+                Fesc = pow(M/1e10,Alpha_esc);
     return Lx_SFR_Fragos(M,z,Alpha_star,Fstar10,Mlim_Fstar)*M*exp(-MassTurnover/M)*Fstar*Fesc*dNdM_conditional_second(z,log(M),M2,del1,del2)/sqrt(2.*PI);
-
-//      return M*exp(-MassTurnover/M)*Fstar*Fesc*dNdM_conditional_second(z,log(M),M2,del1,del2)/sqrt(2.*PI);
-
 }
 
 double Nion_ConditionalM(double z, double M1, double M2, double delta1, double delta2, double MassTurnover, double Alpha_star, double Alpha_esc, double Fstar10, double Fesc10, double Mlim_Fstar, double Mlim_Fesc) {
@@ -1437,6 +1541,47 @@ double Nion_ConditionalM(double z, double M1, double M2, double delta1, double d
     }
 
 }
+
+double Nion_ConditionalM_Xray(double z, double M1, double M2, double delta1, double delta2, double MassTurnover, double Alpha_star, double Alpha_esc, double Fstar10, double Fesc10, double Mlim_Fstar, double Mlim_Fesc) {
+    double result, error, lower_limit, upper_limit;
+    gsl_function F;
+    double rel_tol = 0.005; //<- relative tolerance
+    gsl_integration_workspace * w
+    = gsl_integration_workspace_alloc (1000);
+
+    struct parameters_gsl_SFR_con_int_ parameters_gsl_SFR_con = {
+        .z_obs = z,
+        .Mval = M2,
+        .delta1 = delta1,
+        .delta2 = delta2,
+        .Mdrop = MassTurnover,
+        .pl_star = Alpha_star,
+        .pl_esc = Alpha_esc,
+                .frac_star = Fstar10,
+                .frac_esc = Fesc10,
+                .LimitMass_Fstar = Mlim_Fstar,
+                .LimitMass_Fesc = Mlim_Fesc
+    };
+
+    F.function = &dNion_ConditionallnM_Xray;
+    F.params = &parameters_gsl_SFR_con;
+    lower_limit = M1;
+    upper_limit = M2;
+
+    gsl_integration_qag (&F, lower_limit, upper_limit, 0, rel_tol,
+                        1000, GSL_INTEG_GAUSS61, w, &result, &error);
+    gsl_integration_workspace_free (w);
+
+    if(delta2 >= delta1) {
+        result = 1.;
+	return result;
+    }
+    else {
+        return result;
+    }
+
+}
+
 
 // Set up interpolation table for the number of IGM ionizing photons per baryon and initialise interploation.
 // This function includes conditional mass function over the density field at a given redshift.
@@ -1584,12 +1729,12 @@ void initialise_SFRD_Conditional_table(int Nsteps_zp, int Nfilter, float z[], do
         Mmax = RtoM(R[j]);
         initialiseGL_Nion(NGL_SFR, MassTurnover, Mmax);
         for (i=0; i<NSFR_low; i++){
-            log10_SFRD_z_low_table[i_tot+j][i] = log10(GaussLegendreQuad_Nion(NGL_SFR,z[i_tot+j],log(Mmax),Deltac,overdense_low_table[i]-1.,MassTurnover,Alpha_star,0.,Fstar10,1.,Mlim_Fstar,0.));
+            log10_SFRD_z_low_table[i_tot+j][i] = log10(GaussLegendreQuad_Nion_Xray(NGL_SFR,z[i_tot+j],log(Mmax),Deltac,overdense_low_table[i]-1.,MassTurnover,Alpha_star,0.,Fstar10,1.,Mlim_Fstar,0.));
             if(log10_SFRD_z_low_table[i_tot+j][i] < -40.) log10_SFRD_z_low_table[i_tot+j][i] = -40.;
         }
 
         for(i=0;i<NSFR_high;i++) {
-            SFRD_z_high_table[i_tot+j][i] = Nion_ConditionalM(z[i_tot+j],log(Mmin),log(Mmax),Deltac,Overdense_high_table[i],MassTurnover,Alpha_star,0.,Fstar10,1.,Mlim_Fstar,0.);
+            SFRD_z_high_table[i_tot+j][i] = Nion_ConditionalM_Xray(z[i_tot+j],log(Mmin),log(Mmax),Deltac,Overdense_high_table[i],MassTurnover,Alpha_star,0.,Fstar10,1.,Mlim_Fstar,0.);
             if(SFRD_z_high_table[i_tot+j][i]<0.) SFRD_z_high_table[i_tot+j][i]=pow(10.,-40.0);
         }
       }

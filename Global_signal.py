@@ -8,7 +8,8 @@ from matplotlib import ticker
 import matplotlib.pyplot as plt
 
 data_1 = np.loadtxt('Programs/Power_k0.1_fid')
-data_2 = np.loadtxt('Programs/Power_k0.1_updated')
+data_2 = np.loadtxt('Programs/Power_k0.1_updated_2')
+#data_3 = np.loadtxt('Programs/Power_k0.1')
 plt.plot(data_1[:,0], data_1[:,2], label  =r"${\rm constant\ Lx/SFR}$", c = 'k')
 plt.plot(data_2[:,0], data_2[:,2], label  =r"${\rm Lx/SFR\ Fraogs}$", c = 'b')
 
@@ -16,14 +17,15 @@ plt.plot(data_2[:,0], data_2[:,2], label  =r"${\rm Lx/SFR\ Fraogs}$", c = 'b')
 plt.xlabel(r"${{\rm Redshift},\,z}$",fontsize='large')
 plt.ylabel(r"${\overline{\delta T}^{2}_{\rm b}\Delta^{2}_{21}\,\,[\rm mK^{2}]}$",fontsize='large')
 plt.legend()
-plt.savefig("Global_signal.pdf")
+plt.close()
+#plt.savefig("Global_signal.pdf")
 
 z_187 = np.loadtxt('z_187')[:-1]
 def PS_file(z):
     
     desired_file = 0
     
-    for filename in glob.iglob('/home/hkaur/COMP167/21cmFAST/Output_files/Deldel_T_power_spec/ps_z*'): 
+    for filename in glob.iglob('/home/hkaur/storage2/Xrayproject/21cmFAST/Output_files/Deldel_T_power_spec/ps_z*'): 
         if 'z%06.2f'%z  in filename:
             desired_file = filename
     return desired_file
@@ -32,7 +34,7 @@ def PS_file_updated(z):
 
     desired_file = 0
     
-    for filename in glob.iglob('/home/hkaur/COMP167/21cmFAST/Output_files_updated/Deldel_T_power_spec_updated/ps_z*'): 
+    for filename in glob.iglob('/home/hkaur/COMP167/21cmFAST/Output_files_updated_2/Deldel_T_power_spec_updated_2/ps_z*'): 
         if 'z%06.2f'%z  in filename:
             desired_file = filename
     return desired_file
@@ -63,11 +65,11 @@ def PS_matrix_updated(k):
     return matrix
 
 
-plt.plot(z_187, PS_matrix(0)[6,:], label  =r"${\rm constant\ Lx/SFR}$", c = 'k')
-plt.plot(z_187, PS_matrix_updated(0)[6,:], label  =r"${\rm Fragos\ Lx/SFR}$", c = 'b')
+plt.plot(z_187, PS_matrix(0)[2,:], label  =r"${\rm constant\ Lx/SFR}$", c = 'k')
+plt.plot(z_187, PS_matrix_updated(0)[2,:], label  =r"${\rm Fragos\ Lx/SFR}$", c = 'b')
 plt.xlabel(r"${{\rm Redshift},\,z}$",fontsize='large')
 plt.ylabel('$\delta T_{b}^{2}\Delta_{21}^{2}$ $[$mk$^{2}]$',fontsize='large')
-plt.text(20,10, r'${\rm k = 0.6\mathrm{Mpc^{-1}}}$', fontsize=14)
+plt.text(20,10, r'${\rm k = 0.1\mathrm{Mpc^{-1}}}$', fontsize=14)
 plt.legend()
-plt.close()
+plt.show()
 #plt.savefig("Power_spec_k_0_6.pdf")
