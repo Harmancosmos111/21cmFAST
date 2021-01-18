@@ -190,11 +190,13 @@ double TFmdm(double k); //Eisenstien & Hu power spectrum transfer function
 void TFset_parameters();
 float get_R_c();  // returns R_CUTOFF
 double get_M_min_ion(float z);
-double Lx_SFR_Fragos(double M, double z, double Alpha_star, double Fstar10, double Mlim_Fstar);
+//double Lx_SFR_Fragos(double M, double z, double Alpha_star, double Fstar10, double Mlim_Fstar);
+double Lx_SFR_Fragos(double M, double z);
 /***************************************/
 
 
-double Lx_SFR_Fragos(double M, double z, double Alpha_star, double Fstar10, double Mlim_Fstar )
+//double Lx_SFR_Fragos(double M, double z, double Alpha_star, double Fstar10, double Mlim_Fstar )
+double Lx_SFR_Fragos(double M, double z)
 {
 
     
@@ -203,14 +205,15 @@ double Lx_SFR_Fragos(double M, double z, double Alpha_star, double Fstar10, doub
     double M_0 =  pow(10, b)  ;
     double gamma = 0.522  ;
     double mg_Sun = 8.69 ;
-    double Fstar = 0;
-    if (Alpha_star > 0. && M > Mlim_Fstar)
-        Fstar = 1./Fstar10;
-    else if (Alpha_star < 0. && M < Mlim_Fstar)
-        Fstar = 1/Fstar10;
-    else
-        Fstar = pow(M/1e10,Alpha_star);
-    double M_st = Fstar * (OMm/OMb) * M ;
+//    double Fstar = 0;
+//    if (Alpha_star > 0. && M > Mlim_Fstar)
+//        Fstar = 1./Fstar10;
+//    else if (Alpha_star < 0. && M < Mlim_Fstar)
+//        Fstar = 1/Fstar10;
+//    else
+//        Fstar = pow(M/1e10,Alpha_star);
+    double Fstar;
+    double M_st = Fstar * (OMb/OMm) * M ;
     double mg = Z_0 + log10(1.0 - pow(E, -pow(M_st/M_0,gamma))) ;
     double Z = pow(10.0,mg - mg_Sun)   ;
     double A = 4.13e+01;
@@ -1359,7 +1362,7 @@ float Nion_ConditionallnM_GL_Xray(float lnM, struct parameters_gsl_SFR_con_int_ 
                 Fesc = 1./Fesc10;
         else
                 Fesc = pow(M/1e10,Alpha_esc);
-return Lx_SFR_Fragos(M,z,Alpha_star,Fstar10,Mlim_Fstar)*M*exp(-MassTurnover/M)*Fstar*Fesc*dNdM_conditional_second(z,log(M),M2,del1,del2)/sqrt(2.*PI);
+return Lx_SFR_Fragos(M,z)*M*exp(-MassTurnover/M)*Fstar*Fesc*dNdM_conditional_second(z,log(M),M2,del1,del2)/sqrt(2.*PI);
 }
 
 
@@ -1499,7 +1502,7 @@ double dNion_ConditionallnM_Xray(double lnM, void *params) {
                 Fesc = 1./Fesc10;
         else
                 Fesc = pow(M/1e10,Alpha_esc);
-    return Lx_SFR_Fragos(M,z,Alpha_star,Fstar10,Mlim_Fstar)*M*exp(-MassTurnover/M)*Fstar*Fesc*dNdM_conditional_second(z,log(M),M2,del1,del2)/sqrt(2.*PI);
+    return Lx_SFR_Fragos(M,z)*M*exp(-MassTurnover/M)*Fstar*Fesc*dNdM_conditional_second(z,log(M),M2,del1,del2)/sqrt(2.*PI);
 }
 
 double Nion_ConditionalM(double z, double M1, double M2, double delta1, double delta2, double MassTurnover, double Alpha_star, double Alpha_esc, double Fstar10, double Fesc10, double Mlim_Fstar, double Mlim_Fesc) {
