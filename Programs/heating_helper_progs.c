@@ -378,6 +378,7 @@ void evolveInt(float zp, int arr_num, float curr_delNL0[], double freq_int_heat[
 
   // add prefactors
   dxheat_dt *= const_zp_prefactor;
+//  dxheat_dt *= pow(10.,40.5);
   dxion_source_dt *= const_zp_prefactor;
   if (COMPUTE_Ts){
     dxlya_dt *= const_zp_prefactor*n_b;

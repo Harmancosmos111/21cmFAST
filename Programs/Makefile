@@ -1,8 +1,10 @@
 #C compiler and flags
-CPPFLAGS = -I/usr/local/include
+#CPPFLAGS = -I/usr/local/include
+CPPFLAGS = -I/usr/local/opt/llvm/include -fopenmp 
 LDFLAGS = -lgsl -lgslcblas -lfftw3f_omp -lfftw3f -lm
-CC      = gcc -fopenmp
-
+#CPPFLAGS = -I$(HOME)/3rd_party/include
+#LDFLAGS = -L$(HOME)/3rd_party/lib -lgsl -lgslcblas -lfftw3f_omp -lfftw3f -lm
+CC       = /usr/local/opt/llvm/bin/clang
 
 # Directory hosting the non-project specific code
 COSMO_DIR = ../Cosmo_c_files
@@ -22,21 +24,21 @@ COSMO_FILES = 	${PARAMETER_DIR}/COSMOLOGY.H \
 
 # object files
 OBJ_FILES = init \
-  redshift_interpolate_boxes \
-  print_power_spec_ICs \
-  delta_ps \
-  delta_T \
-  find_HII_bubbles \
-  gen_size_distr \
-  perturb_field \
-  filter_den_hist \
-  boxcar_smooth_field \
-  Ts \
-  drive_zscroll_noTs \
-  drive_xHIscroll \
-  kSZ_power \
-  find_halos \
-  update_halo_pos \
+redshift_interpolate_boxes \
+print_power_spec_ICs \
+delta_ps \
+delta_T \
+find_HII_bubbles \
+gen_size_distr \
+perturb_field \
+filter_den_hist \
+boxcar_smooth_field \
+Ts \
+drive_zscroll_noTs \
+drive_xHIscroll \
+kSZ_power \
+find_halos \
+update_halo_pos \
 
 
 #########################################################################
@@ -46,12 +48,12 @@ drive_logZscroll_Ts: drive_logZscroll_Ts.c \
 	${OBJ_FILES} \
 	${COSMO_FILES} \
 
-	${CC} ${CPPFLAGS} -o drive_logZscroll_Ts drive_logZscroll_Ts.c ${LDFLAGS} 
+	${CC} ${CPPFLAGS} -o drive_logZscroll_Ts drive_logZscroll_Ts.c ${LDFLAGS}
 
 kSZ_power: kSZ_power.c \
 	${COSMO_FILES} \
 	fftCMB.c \
-
+	
 	${CC} ${CPPFLAGS} -o kSZ_power kSZ_power.c ${LDFLAGS}
 
 redshift_interpolate_boxes:     redshift_interpolate_boxes.c \

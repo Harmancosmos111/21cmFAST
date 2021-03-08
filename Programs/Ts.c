@@ -93,6 +93,7 @@ void destroy_21cmMC_arrays() {
 
 
 int main(int argc, char ** argv){
+  init_ps();
   fftwf_complex *box, *unfiltered_box;
   fftwf_plan plan;
   unsigned long long ct, sample_ct;
@@ -118,10 +119,17 @@ double freq_int_heat[NUM_FILTER_STEPS_FOR_Ts], freq_int_ion[NUM_FILTER_STEPS_FOR
  float Splined_Nion_ST_zp, Splined_SFRD_ST_zpp,ION_EFF_FACTOR,fcoll; // New in v2
  float zp_table; //New in v2
  int counter,arr_num; // New in v2
- double Luminosity_conversion_factor;
+ double Luminosity_conversion_factor, zpp_integrand=0, emissivity=0;
  float prev_zp_temp, zp_temp;
- int RESTART = 0;
+ double Lx_SFR_Brorby(double M,  double z,double Fstar10,double Alpha_star,double Mlim_Fstar);
+/*
+ 745   Redshift derivative of the conditional collapsed fraction
+ 746  */
+ float dfcoll_dz(float z, float sigma_min, float del_bias, float sig_bias);
 
+
+ int RESTART = 0;
+// initialiseSplinedSigmaM(1e11,1e19);
 
  /**********  BEGIN INITIALIZATION   **************************************/
  //New in v2
@@ -200,7 +208,7 @@ double freq_int_heat[NUM_FILTER_STEPS_FOR_Ts], freq_int_ion[NUM_FILTER_STEPS_FOR
  
   
  // open log file
- if (!(LOG = fopen("../Log_files/Ts_log", "w") ) ){
+ if (!(LOG = fopen("../Log_files/Ts_log", "a") ) ){
    fprintf(stderr, "Unable to open log file for writting\nAborting...\n");
    return -1;
  }
@@ -543,12 +551,12 @@ double freq_int_heat[NUM_FILTER_STEPS_FOR_Ts], freq_int_ion[NUM_FILTER_STEPS_FOR
     for (R_ct=0; R_ct<NUM_FILTER_STEPS_FOR_Ts; R_ct++)
     for (box_ct=0; box_ct<HII_TOT_NUM_PIXELS;box_ct++)
       delNL0[R_ct][box_ct] = 0;
-    /*  *********/
+        / **********/
 
   // main trapezoidal integral over z' (see eq. ? in Mesinger et al. 2009)
   if (!RESTART){
 	Nsteps_zp = 0;
-    zp = REDSHIFT*1.0001; //higher for rounding
+    zp = REDSHIFT*1.000; //higher for rounding
     while (zp < Z_HEAT_MAX) { 
 	  Nsteps_zp += 1;
       zp = ((1+zp)*ZPRIME_STEP_FACTOR - 1);
@@ -559,7 +567,7 @@ double freq_int_heat[NUM_FILTER_STEPS_FOR_Ts], freq_int_ion[NUM_FILTER_STEPS_FOR
 	prev_zp_temp = zp;
 	zp_temp = zp;
 	Nsteps_zp = 0;
-    zp = REDSHIFT*1.0001; //higher for rounding
+    zp = REDSHIFT*1.000; //higher for rounding
     while (zp < Z_HEAT_MAX) { 
 	  Nsteps_zp += 1;
       zp = ((1+zp)*ZPRIME_STEP_FACTOR - 1);
@@ -567,7 +575,7 @@ double freq_int_heat[NUM_FILTER_STEPS_FOR_Ts], freq_int_ion[NUM_FILTER_STEPS_FOR
     prev_zp = Z_HEAT_MAX;
   }
   
-  zp = ((1+zp)/ ZPRIME_STEP_FACTOR - 1);
+  zp = ((1+zp)/ZPRIME_STEP_FACTOR - 1);
   dzp = zp - prev_zp;
   if (RESTART == 1) {
     zp_temp = ((1+zp_temp)/ ZPRIME_STEP_FACTOR - 1);
@@ -743,8 +751,9 @@ double freq_int_heat[NUM_FILTER_STEPS_FOR_Ts], freq_int_ion[NUM_FILTER_STEPS_FOR
         }    
         else {
 		  fcoll = 1.;
-        }    
-      }    
+        }
+          
+      }
       Splined_Fcoll = fcoll;
       //---------- interpolation for fcoll is done ----------
 	  fcoll_R += Splined_Fcoll;
@@ -834,14 +843,18 @@ double freq_int_heat[NUM_FILTER_STEPS_FOR_Ts], freq_int_ion[NUM_FILTER_STEPS_FOR
     Luminosity_conversion_factor *= (3.1556226e7)/(hplank);
 //    const_zp_prefactor = ( X_LUMINOSITY * Luminosity_conversion_factor ) / NU_X_THRESH * C 
 //			 * F_STAR10 * OMb * RHOcrit * pow(CMperMPC, -3) * pow(1+zp, X_RAY_SPEC_INDEX+3);
-    const_zp_prefactor =  3.0*pow(10.0,39.5) *Luminosity_conversion_factor / NU_X_THRESH * C 
-                       * F_STAR10 * OMb * RHOcrit * pow(CMperMPC, -3) * pow(1+zp, X_RAY_SPEC_INDEX+3);
+    const_zp_prefactor =   pow(10.,40.0) * C * F_STAR10 * OMb * RHOcrit * pow(CMperMPC, -3) * pow(1+zp, X_RAY_SPEC_INDEX+3);
 
-
+  
+    
+     
     /********  LOOP THROUGH BOX *************/
     fprintf(stderr, "Looping through box at z'=%f, time elapsed  (total for all threads)= %06.2f min\n", zp, (double)clock()/CLOCKS_PER_SEC/60.0);
     fprintf(LOG, "Looping through box at z'=%f, time elapsed  (total for all threads)= %06.2f min\n", zp, (double)clock()/CLOCKS_PER_SEC/60.0);
-    fflush(NULL);
+    
+       
+   
+   fflush(NULL);
     time(&start_time);
     for (ct=0; ct<NUMCORES; ct++)
       J_alpha_threads[ct] = xalpha_threads[ct] = Xheat_threads[ct] = Xion_threads[ct] = 0;

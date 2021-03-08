@@ -27,7 +27,7 @@ int main(int argc, char ** argv){
 
 
   time(&start_time);
-
+/*
   // make appropriate directories
   system("mkdir ../Log_files");
   system("mkdir ../Boxes");
@@ -39,7 +39,7 @@ int main(int argc, char ** argv){
   system("mkdir ../Output_files/Deldel_T_power_spec");
   system("mkdir ../Redshift_interpolate_filelists");
   //  system("mkdir ../Lighttravel_filelists");
-
+*/
   // remove some of the previous (astro) files which might conflict with current run
   system("rm ../Boxes/Ts_evolution/*");
   system("rm ../Boxes/Ts_*");
@@ -49,7 +49,7 @@ int main(int argc, char ** argv){
   system("rm ../Boxes/z_first*");
   system("rm ../Output_files/Deldel_T_power_spec/*");  
 
-  init_ps();
+//  init_ps();
 
   // open log file
   system("rm ../Log_files/*");
@@ -60,15 +60,15 @@ int main(int argc, char ** argv){
   }
 
 
-  fprintf(stderr, "Calling init to set up the initial conditions\n");
-  fprintf(LOG, "Calling init to set up the initial conditions\n");
-  system("./init"); // you only need this call once per realization
+//  fprintf(stderr, "Calling init to set up the initial conditions\n");
+//  fprintf(LOG, "Calling init to set up the initial conditions\n");
+//  system("./init"); // you only need this call once per realization
 
-  Z = ZLOW*1.0001; // match rounding convention from Ts.c
-
+//  Z = ZLOW*1.0001; // match rounding convention from Ts.c
+    Z = ZLOW*1;
    // call Ts on the lowest redshift
   if (USE_TS_IN_21CM){
-    sprintf(cmnd, "./perturb_field %.2f", Z);
+//    sprintf(cmnd, "./perturb_field %.2f", Z);
     time(&curr_time);
     fprintf(stderr, "Now calling: %s, %g min have ellapsed\n", cmnd, -difftime(start_time, curr_time)/60.0);
     fprintf(LOG, "Now calling: %s, %g min have ellapsed\n", cmnd, -difftime(start_time, curr_time)/60.0);
@@ -85,20 +85,20 @@ int main(int argc, char ** argv){
 
 
   // now go to highest redshift and step downwards
-  while (Z < ZHIGH){
+  while (Z < 20.){
     Z = ((1+Z)*ZPRIME_STEP_FACTOR - 1);
   }
-  Z = ((1+Z)/ ZPRIME_STEP_FACTOR - 1);
+  Z = ((1+Z)/ZPRIME_STEP_FACTOR - 1);
   while (Z >= ZLOW){
 
     //set the minimum source mass
     //M_MIN = get_M_min_ion(Z);
 
-    // if USE_HALO_FIELD is turned on in ANAL_PARAMS.H, run the halo finder
-    if (USE_HALO_FIELD){
+//     if USE_HALO_FIELD is turned on in ANAL_PARAMS.H, run the halo finder 
+if (USE_HALO_FIELD){
       //  the following only depend on redshift, not ionization field
       // find halos
-      sprintf(cmnd, "./find_halos %.2f", Z);
+//      sprintf(cmnd, "./find_halos %.2f", Z);
       time(&curr_time);
       fprintf(stderr, "Now calling: %s, %g min have ellapsed\n", cmnd, difftime(curr_time, start_time)/60.0);
       fprintf(LOG, "Now calling: %s, %g min have ellapsed\n", cmnd, difftime(curr_time, start_time)/60.0);
@@ -107,7 +107,7 @@ int main(int argc, char ** argv){
 
 
       // shift halos accordig to their linear velocities
-      sprintf(cmnd, "./update_halo_pos %.2f", Z);
+//      sprintf(cmnd, "./update_halo_pos %.2f", Z);
       time(&curr_time);
       fprintf(stderr, "Now calling: %s, %g min have ellapsed\n", cmnd, -difftime(start_time, curr_time)/60.0);
       fprintf(LOG, "Now calling: %s, %g min have ellapsed\n", cmnd, -difftime(start_time, curr_time)/60.0);
@@ -116,13 +116,13 @@ int main(int argc, char ** argv){
     }
 
     // shift density field and update velocity field
-    sprintf(cmnd, "./perturb_field %.2f", Z);
+//    sprintf(cmnd, "./perturb_field %.2f", Z);
     time(&curr_time);
     fprintf(stderr, "Now calling: %s, %g min have ellapsed\n", cmnd, -difftime(start_time, curr_time)/60.0);
     fprintf(LOG, "Now calling: %s, %g min have ellapsed\n", cmnd, -difftime(start_time, curr_time)/60.0);
     fflush(NULL);
     system(cmnd);
-    // end of solely redshift dependent things, now do ionization stuff
+   // end of solely redshift dependent things, now do ionization stuff
 
 
     // if it is the lowest redshift, let's call Ts.c
@@ -137,12 +137,12 @@ int main(int argc, char ** argv){
     } // this will create all of the higher z Ts files in Boxes, provided Ts_verbose is turned on
     // in HEAT_PARAMS.H
 
-
+   
     // find bubbles
     if (INHOMO_RECO)
-      sprintf(cmnd, "./find_HII_bubbles %f %f", Z, (1+Z)*ZPRIME_STEP_FACTOR - 1 );
-    else
-      sprintf(cmnd, "./find_HII_bubbles %f", Z );
+//      sprintf(cmnd, "./find_HII_bubbles %f %f", Z, (1+Z)*ZPRIME_STEP_FACTOR - 1 );
+//    else
+//      sprintf(cmnd, "./find_HII_bubbles %f", Z );
     time(&curr_time);
     fprintf(stderr, "Now calling: %s, %g min have ellapsed\n", cmnd, -difftime(start_time, curr_time)/60.0);
     fprintf(LOG, "Now calling: %s, %g min have ellapsed\n", cmnd, -difftime(start_time, curr_time)/60.0);
@@ -222,5 +222,6 @@ int main(int argc, char ** argv){
   fflush(NULL);
 
   fclose(LOG);
+
   return 0;
 }
