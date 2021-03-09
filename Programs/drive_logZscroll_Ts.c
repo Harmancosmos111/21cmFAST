@@ -49,6 +49,7 @@ int main(int argc, char ** argv){
   system("rm ../Boxes/z_first*");
   system("rm ../Output_files/Deldel_T_power_spec/*");  
 
+
 //  init_ps();
 
   // open log file
@@ -64,8 +65,7 @@ int main(int argc, char ** argv){
 //  fprintf(LOG, "Calling init to set up the initial conditions\n");
 //  system("./init"); // you only need this call once per realization
 
-//  Z = ZLOW*1.0001; // match rounding convention from Ts.c
-    Z = ZLOW*1;
+  Z = ZLOW*1.0001; // match rounding convention from Ts.c
    // call Ts on the lowest redshift
   if (USE_TS_IN_21CM){
 //    sprintf(cmnd, "./perturb_field %.2f", Z);
@@ -85,7 +85,7 @@ int main(int argc, char ** argv){
 
 
   // now go to highest redshift and step downwards
-  while (Z < 20.){
+  while (Z < ZHIGH){
     Z = ((1+Z)*ZPRIME_STEP_FACTOR - 1);
   }
   Z = ((1+Z)/ZPRIME_STEP_FACTOR - 1);
@@ -95,7 +95,7 @@ int main(int argc, char ** argv){
     //M_MIN = get_M_min_ion(Z);
 
 //     if USE_HALO_FIELD is turned on in ANAL_PARAMS.H, run the halo finder 
-if (USE_HALO_FIELD){
+/* if (USE_HALO_FIELD){
       //  the following only depend on redshift, not ionization field
       // find halos
 //      sprintf(cmnd, "./find_halos %.2f", Z);
@@ -126,9 +126,10 @@ if (USE_HALO_FIELD){
 
 
     // if it is the lowest redshift, let's call Ts.c
+*/
     if (USE_TS_IN_21CM && (Z > Z_HEAT_MAX) ) { // NEW CONDITIONAL
       //    if (USE_TS_IN_21CM && (fabs(Z-ZLOW)/Z < 0.0002) ){
-      sprintf(cmnd, "./Ts %.2f", Z);
+//      sprintf(cmnd, "./Ts %.2f", Z);
       time(&curr_time);
       fprintf(stderr, "Now calling: %s, %g min have ellapsed\n", cmnd, -difftime(start_time, curr_time)/60.0);
       fprintf(LOG, "Now calling: %s, %g min have ellapsed\n", cmnd, -difftime(start_time, curr_time)/60.0);
@@ -140,9 +141,9 @@ if (USE_HALO_FIELD){
    
     // find bubbles
     if (INHOMO_RECO)
-//      sprintf(cmnd, "./find_HII_bubbles %f %f", Z, (1+Z)*ZPRIME_STEP_FACTOR - 1 );
-//    else
-//      sprintf(cmnd, "./find_HII_bubbles %f", Z );
+      sprintf(cmnd, "./find_HII_bubbles %f %f", Z, (1+Z)*ZPRIME_STEP_FACTOR - 1 );
+    else
+      sprintf(cmnd, "./find_HII_bubbles %f", Z );
     time(&curr_time);
     fprintf(stderr, "Now calling: %s, %g min have ellapsed\n", cmnd, -difftime(start_time, curr_time)/60.0);
     fprintf(LOG, "Now calling: %s, %g min have ellapsed\n", cmnd, -difftime(start_time, curr_time)/60.0);

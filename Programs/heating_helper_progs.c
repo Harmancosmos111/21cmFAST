@@ -378,7 +378,6 @@ void evolveInt(float zp, int arr_num, float curr_delNL0[], double freq_int_heat[
 
   // add prefactors
   dxheat_dt *= const_zp_prefactor;
-//  dxheat_dt *= pow(10.,40.5);
   dxion_source_dt *= const_zp_prefactor;
   if (COMPUTE_Ts){
     dxlya_dt *= const_zp_prefactor*n_b;
@@ -469,8 +468,8 @@ double integrand_in_nu_heat_integral(double nu, void * params){
   species_sum += interp_fheat((nu - HeII_NUIONIZATION)/NU_over_EV, x_e)
                * hplank*(nu - HeII_NUIONIZATION) * f_He * x_e * HeII_ion_crosssec(nu);
 
-//  return species_sum * pow(nu/NU_X_THRESH, -X_RAY_SPEC_INDEX-1);
-     return species_sum;
+  return species_sum * pow(nu/NU_X_THRESH, -X_RAY_SPEC_INDEX-1);
+
 }
 double integrand_in_nu_ion_integral(double nu, void * params){
   double species_sum, fheat, F_i;

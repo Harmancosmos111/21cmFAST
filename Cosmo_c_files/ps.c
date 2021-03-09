@@ -202,13 +202,13 @@ double Lx_SFR_Brorby(double M,  double z,double Fstar10,double Alpha_star,double
 double Lx_SFR_Brorby(double M,  double z,double Fstar10,double Alpha_star,double Mlim_Fstar)
 {
 
-    double Fstar;
+    double Fstar=0;
    if (Alpha_star > 0. && M > Mlim_Fstar)
                 Fstar = 1./Fstar10;
   else if (Alpha_star < 0. && M < Mlim_Fstar)
                 Fstar = 1/Fstar10;
   else
-                Fstar = pow(M/1e10,Alpha_star);
+                Fstar =Fstar10* pow(M/1e10,Alpha_star);
     double M_st = Fstar * (OMb/OMm) * M ;
     double a = 1.0 ;
     double A_bestfit = 0;
@@ -230,13 +230,13 @@ double Lx_SFR_Fragos(double M, double z,double Fstar10,double Alpha_star,double 
 //    double gamma = 0.522  ;
 //    double mg_Sun = 8.69 ;
      
-double Fstar;         
+double Fstar=0;         
 if (Alpha_star > 0. && M > Mlim_Fstar)
               Fstar = 1./Fstar10; 
 else if (Alpha_star < 0. && M < Mlim_Fstar)
               Fstar = 1/Fstar10;
 else    
-              Fstar = pow(M/1e10,Alpha_star);
+              Fstar =Fstar10 * pow(M/1e10,Alpha_star);
 double M_st = Fstar * (OMb/OMm) * M ;
 //    double mg = Z_0 + log10(1.0 - pow(E, -pow(M_st/M_0,gamma))) ;
 //    double Z = pow(10.0,mg - mg_Sun)   ;
@@ -252,7 +252,7 @@ double M_st = Fstar * (OMb/OMm) * M ;
     {
             Lxsfr  = A + alpha * log10(Z/Z_turn) - (Z/Z_turn)  ;
            }
-    return  0.5*pow(10.,Lxsfr)/pow(10.,40.) ;    //no conversion factor has been included here
+    return  0.5*pow(10.,Lxsfr)/pow(10.,40.) ;    //conversion factor has been included here
 }
 
 double Metallicity_Curti (double M_st, double z)
@@ -1773,12 +1773,12 @@ void initialise_SFRD_Conditional_table(int Nsteps_zp, int Nfilter, float z[], do
         Mmax = RtoM(R[j]);
         initialiseGL_Nion(NGL_SFR, MassTurnover, Mmax);
         for (i=0; i<NSFR_low; i++){
-            log10_SFRD_z_low_table[i_tot+j][i] = log10(GaussLegendreQuad_Nion_Xray(NGL_SFR,z[i_tot+j],log(Mmax),Deltac,overdense_low_table[i]-1.,MassTurnover,Alpha_star,0.,Fstar10,1.,Mlim_Fstar,0.));
+            log10_SFRD_z_low_table[i_tot+j][i] = log10(GaussLegendreQuad_Nion(NGL_SFR,z[i_tot+j],log(Mmax),Deltac,overdense_low_table[i]-1.,MassTurnover,Alpha_star,0.,Fstar10,1.,Mlim_Fstar,0.));
             if(log10_SFRD_z_low_table[i_tot+j][i] < -40.) log10_SFRD_z_low_table[i_tot+j][i] = -40.;
         }
 
         for(i=0;i<NSFR_high;i++) {
-            SFRD_z_high_table[i_tot+j][i] = Nion_ConditionalM_Xray(z[i_tot+j],log(Mmin),log(Mmax),Deltac,Overdense_high_table[i],MassTurnover,Alpha_star,0.,Fstar10,1.,Mlim_Fstar,0.);
+            SFRD_z_high_table[i_tot+j][i] = Nion_ConditionalM(z[i_tot+j],log(Mmin),log(Mmax),Deltac,Overdense_high_table[i],MassTurnover,Alpha_star,0.,Fstar10,1.,Mlim_Fstar,0.);
             if(SFRD_z_high_table[i_tot+j][i]<0.) SFRD_z_high_table[i_tot+j][i]=pow(10.,-40.0);
         }
       }
