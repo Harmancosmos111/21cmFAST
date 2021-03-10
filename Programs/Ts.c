@@ -119,17 +119,11 @@ double freq_int_heat[NUM_FILTER_STEPS_FOR_Ts], freq_int_ion[NUM_FILTER_STEPS_FOR
  float Splined_Nion_ST_zp, Splined_SFRD_ST_zpp,ION_EFF_FACTOR,fcoll; // New in v2
  float zp_table; //New in v2
  int counter,arr_num; // New in v2
- double Luminosity_conversion_factor, zpp_integrand=0, emissivity=0;
+ double Luminosity_conversion_factor;
  float prev_zp_temp, zp_temp;
- double Lx_SFR_Brorby(double M,  double z,double Fstar10,double Alpha_star,double Mlim_Fstar);
-/*
- 745   Redshift derivative of the conditional collapsed fraction
- 746  */
- float dfcoll_dz(float z, float sigma_min, float del_bias, float sig_bias);
 
 
  int RESTART = 0;
-// initialiseSplinedSigmaM(1e11,1e19);
 
  /**********  BEGIN INITIALIZATION   **************************************/
  //New in v2
@@ -208,7 +202,7 @@ double freq_int_heat[NUM_FILTER_STEPS_FOR_Ts], freq_int_ion[NUM_FILTER_STEPS_FOR
  
   
  // open log file
- if (!(LOG = fopen("../Log_files/Ts_log", "a") ) ){
+ if (!(LOG = fopen("../Log_files/Ts_log", "w") ) ){
    fprintf(stderr, "Unable to open log file for writting\nAborting...\n");
    return -1;
  }
@@ -556,7 +550,7 @@ double freq_int_heat[NUM_FILTER_STEPS_FOR_Ts], freq_int_ion[NUM_FILTER_STEPS_FOR
   // main trapezoidal integral over z' (see eq. ? in Mesinger et al. 2009)
   if (!RESTART){
 	Nsteps_zp = 0;
-    zp = REDSHIFT*1.000; //higher for rounding
+    zp = REDSHIFT*1.0001; //higher for rounding
     while (zp < Z_HEAT_MAX) { 
 	  Nsteps_zp += 1;
       zp = ((1+zp)*ZPRIME_STEP_FACTOR - 1);
@@ -567,7 +561,7 @@ double freq_int_heat[NUM_FILTER_STEPS_FOR_Ts], freq_int_ion[NUM_FILTER_STEPS_FOR
 	prev_zp_temp = zp;
 	zp_temp = zp;
 	Nsteps_zp = 0;
-    zp = REDSHIFT*1.000; //higher for rounding
+    zp = REDSHIFT*1.0001; //higher for rounding
     while (zp < Z_HEAT_MAX) { 
 	  Nsteps_zp += 1;
       zp = ((1+zp)*ZPRIME_STEP_FACTOR - 1);
@@ -841,7 +835,7 @@ double freq_int_heat[NUM_FILTER_STEPS_FOR_Ts], freq_int_ion[NUM_FILTER_STEPS_FOR
     }    
     // Finally, convert to the correct units. NU_over_EV*hplank as only want to divide by eV -> erg (owing to the definition of Luminosity)
     Luminosity_conversion_factor *= (3.1556226e7)/(hplank);
-    const_zp_prefactor = ( X_LUMINOSITY * Luminosity_conversion_factor ) / NU_X_THRESH * C 
+    const_zp_prefactor = (X_LUMINOSITY * Luminosity_conversion_factor ) / NU_X_THRESH * C 
 			 * F_STAR10 * OMb * RHOcrit * pow(CMperMPC, -3) * pow(1+zp, X_RAY_SPEC_INDEX+3);
 
   

@@ -129,7 +129,7 @@ int main(int argc, char ** argv){
 */
     if (USE_TS_IN_21CM && (Z > Z_HEAT_MAX) ) { // NEW CONDITIONAL
       //    if (USE_TS_IN_21CM && (fabs(Z-ZLOW)/Z < 0.0002) ){
-//      sprintf(cmnd, "./Ts %.2f", Z);
+      sprintf(cmnd, "./Ts %.2f", Z);
       time(&curr_time);
       fprintf(stderr, "Now calling: %s, %g min have ellapsed\n", cmnd, -difftime(start_time, curr_time)/60.0);
       fprintf(LOG, "Now calling: %s, %g min have ellapsed\n", cmnd, -difftime(start_time, curr_time)/60.0);
