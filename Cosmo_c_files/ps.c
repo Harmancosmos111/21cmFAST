@@ -199,17 +199,20 @@ double Lx_SFR_Brorby(double M,  double z,double Fstar10,double Alpha_star,double
 
 
 //  L_x/SFR linear fit from Brorby 16 
-double Lx_SFR_Brorby(double M,  double z,double Fstar10,double Alpha_star,double Mlim_Fstar)
+double Lx_SFR_Brorby(double M,  double z,double Fstar10,double Alpha_star)
 {
 
-    double Fstar=0;
-   if (Alpha_star > 0. && M > Mlim_Fstar)
-                Fstar = 1./Fstar10;
-  else if (Alpha_star < 0. && M < Mlim_Fstar)
-                Fstar = 1/Fstar10;
-  else
-                Fstar =Fstar10* pow(M/1e10,Alpha_star);
-    double M_st = Fstar * (OMb/OMm) * M ;
+    
+    double  F_star =Fstar10* pow(M/1e10,Alpha_star);
+    double M_st = 0;            
+    if (F_star > 1)
+   {
+         M_st = (OMb/OMm) * M ;
+   }
+   else
+   {
+         M_st = F_star * (OMb/OMm) * M ;
+   }
     double a = 1.0 ;
     double A_bestfit = 0;
     double Z = Metallicity_Curti(M_st,z) ;
@@ -220,7 +223,7 @@ double Lx_SFR_Brorby(double M,  double z,double Fstar10,double Alpha_star,double
 
 
 //double Lx_SFR_Fragos(double M, double z, double Alpha_star, double Fstar10, double Mlim_Fstar )
-double Lx_SFR_Fragos(double M, double z,double Fstar10,double Alpha_star,double Mlim_Fstar)
+double Lx_SFR_Fragos(double M, double z,double Fstar10,double Alpha_star)
 {
 
     
@@ -230,16 +233,19 @@ double Lx_SFR_Fragos(double M, double z,double Fstar10,double Alpha_star,double 
 //    double gamma = 0.522  ;
 //    double mg_Sun = 8.69 ;
      
-double Fstar=0;         
-if (Alpha_star > 0. && M > Mlim_Fstar)
-              Fstar = 1./Fstar10; 
-else if (Alpha_star < 0. && M < Mlim_Fstar)
-              Fstar = 1/Fstar10;
-else    
-              Fstar =Fstar10 * pow(M/1e10,Alpha_star);
-double M_st = Fstar * (OMb/OMm) * M ;
 //    double mg = Z_0 + log10(1.0 - pow(E, -pow(M_st/M_0,gamma))) ;
 //    double Z = pow(10.0,mg - mg_Sun)   ;
+    double  F_star =Fstar10* pow(M/1e10,Alpha_star);
+    double M_st = 0;     
+    if (F_star > 1) 
+    {
+         M_st = (OMb/OMm) * M ;
+    }
+    else 
+    {
+         M_st = F_star * (OMb/OMm) * M ;
+    }
+
     double Z = Metallicity_Curti (M_st,z);
     double A = 4.13e+01;
     double Z_turn = 8.03e-03/Z_Sun ;        //in Solar units
@@ -1403,7 +1409,7 @@ float Nion_ConditionallnM_GL_Xray(float lnM, struct parameters_gsl_SFR_con_int_ 
                 Fesc = 1./Fesc10;
         else
                 Fesc = pow(M/1e10,Alpha_esc);
-return Lx_SFR_Brorby(M,z,Fstar10,Alpha_star,Mlim_Fstar)*M*exp(-MassTurnover/M)*Fstar*Fesc*dNdM_conditional_second(z,log(M),M2,del1,del2)/sqrt(2.*PI);
+return Lx_SFR_Brorby(M,z,Fstar10,Alpha_star)*M*exp(-MassTurnover/M)*Fstar*Fesc*dNdM_conditional_second(z,log(M),M2,del1,del2)/sqrt(2.*PI);
 }
 
 
@@ -1543,7 +1549,7 @@ double dNion_ConditionallnM_Xray(double lnM, void *params) {
                 Fesc = 1./Fesc10;
         else
                 Fesc = pow(M/1e10,Alpha_esc);
-    return Lx_SFR_Brorby(M, z, Fstar10, Alpha_star, Mlim_Fstar)*M*exp(-MassTurnover/M)*Fstar*Fesc*dNdM_conditional_second(z,log(M),M2,del1,del2)/sqrt(2.*PI);
+    return Lx_SFR_Brorby(M, z, Fstar10, Alpha_star)*M*exp(-MassTurnover/M)*Fstar*Fesc*dNdM_conditional_second(z,log(M),M2,del1,del2)/sqrt(2.*PI);
 }
 
 double Nion_ConditionalM(double z, double M1, double M2, double delta1, double delta2, double MassTurnover, double Alpha_star, double Alpha_esc, double Fstar10, double Fesc10, double Mlim_Fstar, double Mlim_Fesc) {
